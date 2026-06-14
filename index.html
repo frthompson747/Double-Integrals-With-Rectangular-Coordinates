@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Cup 2026 — My Tracker (Mountain Time)</title>
+<style>
+  :root{
+    --bg:#0c1019; --panel:#141b29; --panel2:#1b2435; --line:#26314a;
+    --txt:#e8edf6; --muted:#8a97ad; --accent:#3ad07a; --live:#ff5252;
+    --chip:#223049; --gold:#ffcc4d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--txt);font-size:15px;line-height:1.4}
+  header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#0c1019,#0c1019f0);
+         border-bottom:1px solid var(--line);padding:14px 16px;backdrop-filter:blur(6px)}
+  .h-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+  h1 small{color:var(--muted);font-weight:500;font-size:12px;display:block}
+  .grow{flex:1}
+  button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--txt);
+         border-radius:9px;padding:8px 12px;font-size:13px;font-weight:600}
+  button:hover{border-color:#3a4a6b}
+  button.primary{background:var(--accent);color:#06120a;border-color:transparent}
+  button.primary:disabled{opacity:.6;cursor:wait}
+  .status{font-size:12px;color:var(--muted)}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .filters button{padding:6px 10px;border-radius:999px;font-size:12px}
+  .filters button.on{background:var(--chip);border-color:#3a4a6b;color:#fff}
+  main{max-width:920px;margin:0 auto;padding:14px 12px 60px}
+  .daygroup{margin-top:18px}
+  .dayhdr{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;
+          margin:0 4px 8px;font-weight:700}
+  .match{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;
+         background:var(--panel);border:1px solid var(--line);border-radius:12px;
+         padding:10px 12px;margin-bottom:8px}
+  .match.live{border-color:var(--live);box-shadow:0 0 0 1px var(--live) inset}
+  .time{font-size:12px;color:var(--muted);font-weight:600;text-align:center}
+  .stagechip{display:inline-block;font-size:10px;color:var(--gold);margin-top:3px}
+  .teams{min-width:0}
+  .tline{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:1px 0}
+  .tname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+  .tname.win{color:#fff}
+  .tname.tbd{color:var(--muted);font-style:italic;font-weight:500}
+  .sc{font-variant-numeric:tabular-nums;font-weight:800;font-size:17px;min-width:22px;text-align:right}
+  .venue{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+  .b-live{background:var(--live);color:#fff}
+  .b-final{background:#2a3650;color:#c8d2e6}
+  .b-sched{background:#202a3e;color:var(--muted)}
+  .b-manual{background:#3a2d12;color:var(--gold)}
+  .edit{font-size:11px;color:var(--muted);border:none;background:none;padding:2px 4px;text-decoration:underline}
+  .editor input{width:34px;background:var(--panel2);border:1px solid var(--line);color:#fff;
+                 border-radius:6px;padding:3px;text-align:center;font-size:14px}
+  .editor{display:flex;align-items:center;gap:4px}
+  .empty{color:var(--muted);text-align:center;padding:40px}
+  .note{font-size:11px;color:var(--muted);margin-top:6px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-row">
+    <h1>🏆 World Cup 2026 Tracker<small>All times Mountain Time (MT)</small></h1>
+    <div class="grow"></div>
+    <label class="status"><input type="checkbox" id="auto"> auto 60s</label>
+    <button id="refresh" class="primary">↻ Refresh scores</button>
+    <button id="syncall" title="Fetch every played date">⤓ Sync all</button>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="status" id="updated">Tip: click <b>Edit</b> on any match to enter a score yourself — it’s saved on this device only.</div>
+</header>
+<main><div id="list"></div></main>
+
+<script>
+const MATCHES = [{"id": 1, "stage": "Group Stage", "date": "2026-06-11", "time": "1:00 PM", "home": "Mexico", "away": "South Africa", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 2, "stage": "Group Stage", "date": "2026-06-11", "time": "8:00 PM", "home": "South Korea", "away": "Czechia", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 3, "stage": "Group Stage", "date": "2026-06-12", "time": "1:00 PM", "home": "Canada", "away": "Bosnia and Herzegovina", "venue": "BMO Field; Toronto, CAN"}, {"id": 4, "stage": "Group Stage", "date": "2026-06-12", "time": "7:00 PM", "home": "United States", "away": "Paraguay", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 5, "stage": "Group Stage", "date": "2026-06-13", "time": "1:00 PM", "home": "Qatar", "away": "Switzerland", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 6, "stage": "Group Stage", "date": "2026-06-13", "time": "4:00 PM", "home": "Brazil", "away": "Morocco", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 7, "stage": "Group Stage", "date": "2026-06-13", "time": "7:00 PM", "home": "Haiti", "away": "Scotland", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 8, "stage": "Group Stage", "date": "2026-06-13", "time": "10:00 PM", "home": "Australia", "away": "Türkiye", "venue": "BC Place; Vancouver, CAN"}, {"id": 9, "stage": "Group Stage", "date": "2026-06-14", "time": "11:00 AM", "home": "Germany", "away": "Curacao", "venue": "NRG Stadium; Houston, TX"}, {"id": 10, "stage": "Group Stage", "date": "2026-06-14", "time": "2:00 PM", "home": "Netherlands", "away": "Japan", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 11, "stage": "Group Stage", "date": "2026-06-14", "time": "5:00 PM", "home": "Ivory Coast", "away": "Ecuador", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 12, "stage": "Group Stage", "date": "2026-06-14", "time": "8:00 PM", "home": "Sweden", "away": "Tunisia", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 13, "stage": "Group Stage", "date": "2026-06-15", "time": "10:00 AM", "home": "Spain", "away": "Cape Verde", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 14, "stage": "Group Stage", "date": "2026-06-15", "time": "1:00 PM", "home": "Belgium", "away": "Egypt", "venue": "Lumen Field; Seattle, WA"}, {"id": 15, "stage": "Group Stage", "date": "2026-06-15", "time": "4:00 PM", "home": "Saudi Arabia", "away": "Uruguay", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 16, "stage": "Group Stage", "date": "2026-06-15", "time": "7:00 PM", "home": "Iran", "away": "New Zealand", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 17, "stage": "Group Stage", "date": "2026-06-16", "time": "1:00 PM", "home": "France", "away": "Senegal", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 18, "stage": "Group Stage", "date": "2026-06-16", "time": "4:00 PM", "home": "Iraq", "away": "Norway", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 19, "stage": "Group Stage", "date": "2026-06-16", "time": "7:00 PM", "home": "Argentina", "away": "Algeria", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 20, "stage": "Group Stage", "date": "2026-06-16", "time": "10:00 PM", "home": "Austria", "away": "Jordan", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 21, "stage": "Group Stage", "date": "2026-06-17", "time": "11:00 AM", "home": "Portugal", "away": "Congo DR", "venue": "NRG Stadium; Houston, TX"}, {"id": 22, "stage": "Group Stage", "date": "2026-06-17", "time": "2:00 PM", "home": "England", "away": "Croatia", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 23, "stage": "Group Stage", "date": "2026-06-17", "time": "5:00 PM", "home": "Ghana", "away": "Panama", "venue": "BMO Field; Toronto, CAN"}, {"id": 24, "stage": "Group Stage", "date": "2026-06-17", "time": "8:00 PM", "home": "Uzbekistan", "away": "Colombia", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 25, "stage": "Group Stage", "date": "2026-06-18", "time": "10:00 AM", "home": "Czechia", "away": "South Africa", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 26, "stage": "Group Stage", "date": "2026-06-18", "time": "1:00 PM", "home": "Switzerland", "away": "Bosnia and Herzegovina", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 27, "stage": "Group Stage", "date": "2026-06-18", "time": "4:00 PM", "home": "Canada", "away": "Qatar", "venue": "BC Place; Vancouver, CAN"}, {"id": 28, "stage": "Group Stage", "date": "2026-06-18", "time": "7:00 PM", "home": "Mexico", "away": "South Korea", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 29, "stage": "Group Stage", "date": "2026-06-19", "time": "1:00 PM", "home": "United States", "away": "Australia", "venue": "Lumen Field; Seattle, WA"}, {"id": 30, "stage": "Group Stage", "date": "2026-06-19", "time": "4:00 PM", "home": "Scotland", "away": "Morocco", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 31, "stage": "Group Stage", "date": "2026-06-19", "time": "7:30 PM", "home": "Brazil", "away": "Haiti", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 32, "stage": "Group Stage", "date": "2026-06-19", "time": "9:00 PM", "home": "Türkiye", "away": "Paraguay", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 33, "stage": "Group Stage", "date": "2026-06-20", "time": "11:00 AM", "home": "Netherlands", "away": "Sweden", "venue": "NRG Stadium; Houston, TX"}, {"id": 34, "stage": "Group Stage", "date": "2026-06-20", "time": "2:00 PM", "home": "Germany", "away": "Ivory Coast", "venue": "BMO Field; Toronto, CAN"}, {"id": 35, "stage": "Group Stage", "date": "2026-06-20", "time": "6:00 PM", "home": "Ecuador", "away": "Curacao", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 36, "stage": "Group Stage", "date": "2026-06-20", "time": "10:00 PM", "home": "Tunisia", "away": "Japan", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 37, "stage": "Group Stage", "date": "2026-06-21", "time": "10:00 AM", "home": "Spain", "away": "Saudi Arabia", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 38, "stage": "Group Stage", "date": "2026-06-21", "time": "1:00 PM", "home": "Belgium", "away": "Iran", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 39, "stage": "Group Stage", "date": "2026-06-21", "time": "4:00 PM", "home": "Uruguay", "away": "Cape Verde", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 40, "stage": "Group Stage", "date": "2026-06-21", "time": "7:00 PM", "home": "New Zealand", "away": "Egypt", "venue": "BC Place; Vancouver, CAN"}, {"id": 41, "stage": "Group Stage", "date": "2026-06-22", "time": "11:00 AM", "home": "Argentina", "away": "Austria", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 42, "stage": "Group Stage", "date": "2026-06-22", "time": "3:00 PM", "home": "France", "away": "Iraq", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 43, "stage": "Group Stage", "date": "2026-06-22", "time": "6:00 PM", "home": "Norway", "away": "Senegal", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 44, "stage": "Group Stage", "date": "2026-06-22", "time": "9:00 PM", "home": "Jordan", "away": "Algeria", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 45, "stage": "Group Stage", "date": "2026-06-23", "time": "11:00 AM", "home": "Portugal", "away": "Uzbekistan", "venue": "NRG Stadium; Houston, TX"}, {"id": 46, "stage": "Group Stage", "date": "2026-06-23", "time": "2:00 PM", "home": "England", "away": "Ghana", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 47, "stage": "Group Stage", "date": "2026-06-23", "time": "5:00 PM", "home": "Panama", "away": "Croatia", "venue": "BMO Field; Toronto, CAN"}, {"id": 48, "stage": "Group Stage", "date": "2026-06-23", "time": "8:00 PM", "home": "Colombia", "away": "Congo DR", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 49, "stage": "Group Stage", "date": "2026-06-24", "time": "1:00 PM", "home": "Switzerland", "away": "Canada", "venue": "BC Place; Vancouver, CAN"}, {"id": 50, "stage": "Group Stage", "date": "2026-06-24", "time": "1:00 PM", "home": "Bosnia and Herzegovina", "away": "Qatar", "venue": "Lumen Field; Seattle, WA"}, {"id": 51, "stage": "Group Stage", "date": "2026-06-24", "time": "4:00 PM", "home": "Scotland", "away": "Brazil", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 52, "stage": "Group Stage", "date": "2026-06-24", "time": "4:00 PM", "home": "Morocco", "away": "Haiti", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 53, "stage": "Group Stage", "date": "2026-06-24", "time": "7:00 PM", "home": "Czechia", "away": "Mexico", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 54, "stage": "Group Stage", "date": "2026-06-24", "time": "7:00 PM", "home": "South Africa", "away": "South Korea", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 55, "stage": "Group Stage", "date": "2026-06-25", "time": "2:00 PM", "home": "Curacao", "away": "Ivory Coast", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 56, "stage": "Group Stage", "date": "2026-06-25", "time": "2:00 PM", "home": "Ecuador", "away": "Germany", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 57, "stage": "Group Stage", "date": "2026-06-25", "time": "5:00 PM", "home": "Tunisia", "away": "Netherlands", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 58, "stage": "Group Stage", "date": "2026-06-25", "time": "5:00 PM", "home": "Japan", "away": "Sweden", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 59, "stage": "Group Stage", "date": "2026-06-25", "time": "8:00 PM", "home": "Türkiye", "away": "United States", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 60, "stage": "Group Stage", "date": "2026-06-25", "time": "8:00 PM", "home": "Paraguay", "away": "Australia", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 61, "stage": "Group Stage", "date": "2026-06-26", "time": "1:00 PM", "home": "Norway", "away": "France", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 62, "stage": "Group Stage", "date": "2026-06-26", "time": "1:00 PM", "home": "Senegal", "away": "Iraq", "venue": "BMO Field; Toronto, CAN"}, {"id": 63, "stage": "Group Stage", "date": "2026-06-26", "time": "6:00 PM", "home": "Uruguay", "away": "Spain", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 64, "stage": "Group Stage", "date": "2026-06-26", "time": "6:00 PM", "home": "Cape Verde", "away": "Saudi Arabia", "venue": "NRG Stadium; Houston, TX"}, {"id": 65, "stage": "Group Stage", "date": "2026-06-26", "time": "9:00 PM", "home": "New Zealand", "away": "Belgium", "venue": "BC Place; Vancouver, CAN"}, {"id": 66, "stage": "Group Stage", "date": "2026-06-26", "time": "9:00 PM", "home": "Egypt", "away": "Iran", "venue": "Lumen Field; Seattle, WA"}, {"id": 67, "stage": "Group Stage", "date": "2026-06-27", "time": "3:00 PM", "home": "Panama", "away": "England", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 68, "stage": "Group Stage", "date": "2026-06-27", "time": "3:00 PM", "home": "Croatia", "away": "Ghana", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 69, "stage": "Group Stage", "date": "2026-06-27", "time": "5:30 PM", "home": "Colombia", "away": "Portugal", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 70, "stage": "Group Stage", "date": "2026-06-27", "time": "5:30 PM", "home": "Congo DR", "away": "Uzbekistan", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 71, "stage": "Group Stage", "date": "2026-06-27", "time": "9:00 PM", "home": "Jordan", "away": "Argentina", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 72, "stage": "Group Stage", "date": "2026-06-27", "time": "9:00 PM", "home": "Algeria", "away": "Austria", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 73, "stage": "Round of 32", "date": "2026-06-28", "time": "1:00 PM", "home": "2A", "away": "2B", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 74, "stage": "Round of 32", "date": "2026-06-29", "time": "11:00 AM", "home": "1C", "away": "2F", "venue": "NRG Stadium; Houston, TX"}, {"id": 75, "stage": "Round of 32", "date": "2026-06-29", "time": "2:30 PM", "home": "1E", "away": "3ABCDF", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 76, "stage": "Round of 32", "date": "2026-06-29", "time": "7:00 PM", "home": "1F", "away": "2C", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 77, "stage": "Round of 32", "date": "2026-06-30", "time": "11:00 AM", "home": "2E", "away": "2I", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 78, "stage": "Round of 32", "date": "2026-06-30", "time": "3:00 PM", "home": "1I", "away": "3CDFGH", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 79, "stage": "Round of 32", "date": "2026-06-30", "time": "7:00 PM", "home": "1A", "away": "3CEFHI", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 80, "stage": "Round of 32", "date": "2026-07-01", "time": "10:00 AM", "home": "1L", "away": "3EHIJK", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 81, "stage": "Round of 32", "date": "2026-07-01", "time": "2:00 PM", "home": "1G", "away": "3AEHIJ", "venue": "Lumen Field; Seattle, WA"}, {"id": 82, "stage": "Round of 32", "date": "2026-07-01", "time": "6:00 PM", "home": "1D", "away": "3BEFIJ", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 83, "stage": "Round of 32", "date": "2026-07-02", "time": "1:00 PM", "home": "1H", "away": "2J", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 84, "stage": "Round of 32", "date": "2026-07-02", "time": "5:00 PM", "home": "2K", "away": "2L", "venue": "BMO Field; Toronto, CAN"}, {"id": 85, "stage": "Round of 32", "date": "2026-07-02", "time": "9:00 PM", "home": "1B", "away": "3EFGIJ", "venue": "BC Place; Vancouver, CAN"}, {"id": 86, "stage": "Round of 32", "date": "2026-07-03", "time": "12:00 PM", "home": "2D", "away": "2G", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 87, "stage": "Round of 32", "date": "2026-07-03", "time": "4:00 PM", "home": "1J", "away": "2H", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 88, "stage": "Round of 32", "date": "2026-07-03", "time": "7:30 PM", "home": "1K", "away": "3DEIJL", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 89, "stage": "Round of 16", "date": "2026-07-04", "time": "11:00 AM", "home": null, "away": null, "venue": "NRG Stadium; Houston, TX"}, {"id": 90, "stage": "Round of 16", "date": "2026-07-04", "time": "3:00 PM", "home": null, "away": null, "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 91, "stage": "Round of 16", "date": "2026-07-05", "time": "2:00 PM", "home": null, "away": null, "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 92, "stage": "Round of 16", "date": "2026-07-05", "time": "6:00 PM", "home": null, "away": null, "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 93, "stage": "Round of 16", "date": "2026-07-06", "time": "1:00 PM", "home": null, "away": null, "venue": "AT&T Stadium; Arlington, TX"}, {"id": 94, "stage": "Round of 16", "date": "2026-07-06", "time": "6:00 PM", "home": null, "away": null, "venue": "Lumen Field; Seattle, WA"}, {"id": 95, "stage": "Round of 16", "date": "2026-07-07", "time": "10:00 AM", "home": null, "away": null, "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 96, "stage": "Round of 16", "date": "2026-07-07", "time": "2:00 PM", "home": null, "away": null, "venue": "BC Place; Vancouver, CAN"}, {"id": 97, "stage": "Quarterfinals", "date": "2026-07-09", "time": "2:00 PM", "home": null, "away": null, "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 98, "stage": "Quarterfinals", "date": "2026-07-10", "time": "1:00 PM", "home": null, "away": null, "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 99, "stage": "Quarterfinals", "date": "2026-07-11", "time": "3:00 PM", "home": null, "away": null, "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 100, "stage": "Quarterfinals", "date": "2026-07-11", "time": "7:00 PM", "home": null, "away": null, "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 101, "stage": "Semifinals", "date": "2026-07-14", "time": "1:00 PM", "home": null, "away": null, "venue": "AT&T Stadium; Arlington, TX"}, {"id": 102, "stage": "Semifinals", "date": "2026-07-15", "time": "1:00 PM", "home": null, "away": null, "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 103, "stage": "Third-Place Match", "date": "2026-07-18", "time": "3:00 PM", "home": null, "away": null, "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 104, "stage": "Final", "date": "2026-07-19", "time": "1:00 PM", "home": null, "away": null, "venue": "MetLife Stadium; East Rutherford, NJ"}];
+const LEAGUE = "fifa.world"; // ESPN public soccer league slug for the FIFA World Cup
+const LS_SCORES = "wc26.scores.v1";
+const LS_FILTER = "wc26.filter.v1";
+
+// ---- local persisted scores: { [id]: {h, a, status, src, det} } ----
+let store = {};
+try{ store = JSON.parse(localStorage.getItem(LS_SCORES)) || {}; }catch(e){ store = {}; }
+function save(){ localStorage.setItem(LS_SCORES, JSON.stringify(store)); }
+
+// ---- team name canonicalization for matching ESPN -> our schedule ----
+function canon(name){
+  if(!name) return "";
+  let s = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  s = s.replace(/[^a-z0-9]/g,"");
+  const alias = {
+    turkey:"turkiye", trkiye:"turkiye",
+    czechrepublic:"czechia",
+    cotedivoire:"ivorycoast", ivorycoast:"ivorycoast",
+    drcongo:"congodr", democraticrepublicofthecongo:"congodr", congodr:"congodr", congodemocraticrepublic:"congodr",
+    korearepublic:"southkorea", southkorea:"southkorea",
+    usa:"unitedstates", unitedstatesofamerica:"unitedstates", us:"unitedstates",
+    caboverde:"capeverde", capeverde:"capeverde",
+    bosniaherzegovina:"bosniaandherzegovina",
+    irislamicrepublic:"iran", iranislamicrepublic:"iran",
+    curacao:"curacao",
+  };
+  return alias[s] || s;
+}
+function pairKey(a,b){ return [canon(a),canon(b)].sort().join("__"); }
+
+// schedule lookup by team pair (group stage only -> teams known)
+const pairToId = {};
+MATCHES.forEach(m=>{ if(m.home && m.away) pairToId[pairKey(m.home,m.away)] = m.id; });
+
+// ---- date helpers ----
+function ymd(iso){ return iso.replace(/-/g,""); } // 2026-06-14 -> 20260614
+function todayLocalYMD(){
+  const d=new Date();
+  return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+}
+const ALL_DATES = [...new Set(MATCHES.map(m=>ymd(m.date)))].sort();
+
+// ---- ESPN fetch + merge ----
+async function fetchScoreboard(dateYMD){
+  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${LEAGUE}/scoreboard?dates=${dateYMD}`;
+  const r = await fetch(url, {cache:"no-store"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+function ingest(data){
+  let n=0;
+  (data.events||[]).forEach(ev=>{
+    const comp = (ev.competitions||[])[0]; if(!comp) return;
+    const cs = comp.competitors||[]; if(cs.length<2) return;
+    const A=cs[0], B=cs[1];
+    const nameA=(A.team&&(A.team.displayName||A.team.name))||A.displayName;
+    const nameB=(B.team&&(B.team.displayName||B.team.name))||B.displayName;
+    const id = pairToId[pairKey(nameA,nameB)];
+    if(!id) return; // can't map (e.g. knockout TBD) -> skip
+    const m = MATCHES.find(x=>x.id===id);
+    // align ESPN scores to our home/away ordering
+    const map={}; map[canon(nameA)]=A.score; map[canon(nameB)]=B.score;
+    const sh=map[canon(m.home)], sa=map[canon(m.away)];
+    const st=(ev.status&&ev.status.type)||{};
+    const state = st.state||"pre"; // pre | in | post
+    const prev = store[id];
+    if(prev && prev.src==="manual") return; // never overwrite a manual entry
+    store[id] = {
+      h: sh===undefined?null:Number(sh),
+      a: sa===undefined?null:Number(sa),
+      status: state==="in"?"live":(state==="post"?"final":"sched"),
+      det: st.shortDetail||st.detail||"",
+      src: "api"
+    };
+    n++;
+  });
+  return n;
+}
+
+async function refresh(dates){
+  const btn=document.getElementById("refresh"), sync=document.getElementById("syncall");
+  btn.disabled=true; sync.disabled=true;
+  setStatus("Fetching latest scores…");
+  let updated=0, errors=0;
+  await Promise.all(dates.map(d=>
+    fetchScoreboard(d).then(j=>{ updated+=ingest(j); }).catch(()=>{ errors++; })
+  ));
+  save(); render();
+  const t=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  if(errors && updated===0){
+    setStatus(`Couldn’t reach the live feed (${errors} request(s) failed). Showing saved/edited scores. You can still tap Edit to enter scores. Last try ${t}.`);
+  }else{
+    setStatus(`Updated ${updated} match score(s) at ${t}.` + (errors?` (${errors} date(s) failed)`:""));
+  }
+  btn.disabled=false; sync.disabled=false;
+}
+function recentDates(){
+  // today + previous 2 days that exist in the schedule
+  const today=todayLocalYMD();
+  const past = ALL_DATES.filter(d=>d<=today);
+  const set=new Set(past.slice(-3));
+  set.add(today);
+  return [...set].filter(d=>ALL_DATES.includes(d));
+}
+
+// ---- rendering ----
+let activeFilter = localStorage.getItem(LS_FILTER) || "Today";
+const STAGES=["Group Stage","Round of 32","Round of 16","Quarterfinals","Semifinals","Third-Place Match","Final"];
+const FILTERS=["Today","Live","All",...STAGES];
+
+function setStatus(t){ document.getElementById("updated").innerHTML=t; }
+
+function dayLabel(iso){
+  const [y,mo,da]=iso.split("-").map(Number);
+  const dt=new Date(y,mo-1,da);
+  return dt.toLocaleDateString([], {weekday:"long",month:"long",day:"numeric"});
+}
+function isToday(iso){ return ymd(iso)===todayLocalYMD(); }
+
+function matchRow(m){
+  const sc = store[m.id] || {};
+  const live = sc.status==="live";
+  const hasScore = sc.h!=null && sc.a!=null;
+  const homeWin = hasScore && sc.h>sc.a, awayWin = hasScore && sc.a>sc.h;
+  const tbd = !(m.home&&m.away);
+  const homeName = m.home || "TBD";
+  const awayName = m.away || "TBD";
+
+  let badge="";
+  if(sc.src==="manual") badge=`<span class="badge b-manual">edited</span>`;
+  else if(live) badge=`<span class="badge b-live">● LIVE${sc.det?(" "+sc.det):""}</span>`;
+  else if(sc.status==="final") badge=`<span class="badge b-final">FT</span>`;
+  else badge=`<span class="badge b-sched">${m.time}</span>`;
+
+  const scH = hasScore? sc.h : "–";
+  const scA = hasScore? sc.a : "–";
+
+  return `<div class="match ${live?"live":""}" data-id="${m.id}">
+    <div class="time">${m.time}<div class="stagechip">${m.stage==="Group Stage"?"":m.stage}</div></div>
+    <div class="teams">
+      <div class="tline"><span class="tname ${homeWin?"win":""} ${tbd?"tbd":""}">${homeName}</span><span class="sc">${scH}</span></div>
+      <div class="tline"><span class="tname ${awayWin?"win":""} ${tbd?"tbd":""}">${awayName}</span><span class="sc">${scA}</span></div>
+      <div class="venue">${m.venue}</div>
+    </div>
+    <div class="meta">
+      ${badge}
+      <button class="edit" data-edit="${m.id}">Edit</button>
+    </div>
+  </div>`;
+}
+
+function render(){
+  // filter buttons
+  const fc=document.getElementById("filters");
+  fc.innerHTML=FILTERS.map(f=>`<button class="${f===activeFilter?"on":""}" data-f="${f}">${f}</button>`).join("");
+
+  let list = MATCHES.slice();
+  if(activeFilter==="Today") list=list.filter(m=>isToday(m.date));
+  else if(activeFilter==="Live") list=list.filter(m=>(store[m.id]||{}).status==="live");
+  else if(STAGES.includes(activeFilter)) list=list.filter(m=>m.stage===activeFilter);
+
+  const host=document.getElementById("list");
+  if(!list.length){
+    let msg = activeFilter==="Today" ? "No matches scheduled for today." :
+              activeFilter==="Live" ? "No matches are live right now." : "No matches.";
+    host.innerHTML=`<div class="empty">${msg}</div>`;
+    return;
+  }
+  // group by date
+  const byDate={};
+  list.forEach(m=>{ (byDate[m.date]=byDate[m.date]||[]).push(m); });
+  host.innerHTML=Object.keys(byDate).sort().map(d=>
+    `<div class="daygroup"><div class="dayhdr">${dayLabel(d)}${isToday(d)?" · Today":""}</div>${byDate[d].map(matchRow).join("")}</div>`
+  ).join("");
+}
+
+// ---- editing a score by hand ----
+function openEditor(id){
+  const m=MATCHES.find(x=>x.id===id); if(!m) return;
+  const sc=store[id]||{};
+  const row=document.querySelector(`.match[data-id="${id}"] .meta`);
+  if(!row) return;
+  row.innerHTML=`<div class="editor">
+      <input id="eh" type="number" min="0" value="${sc.h!=null?sc.h:""}">
+      <span>:</span>
+      <input id="ea" type="number" min="0" value="${sc.a!=null?sc.a:""}">
+    </div>
+    <div><button data-save="${id}" class="edit">Save</button>
+    <button data-clear="${id}" class="edit">Clear</button></div>`;
+}
+
+document.addEventListener("click",(e)=>{
+  const f=e.target.closest("[data-f]");
+  if(f){ activeFilter=f.dataset.f; localStorage.setItem(LS_FILTER,activeFilter); render(); return; }
+  const ed=e.target.closest("[data-edit]");
+  if(ed){ openEditor(Number(ed.dataset.edit)); return; }
+  const sv=e.target.closest("[data-save]");
+  if(sv){
+    const id=Number(sv.dataset.save);
+    const h=document.getElementById("eh").value, a=document.getElementById("ea").value;
+    store[id]={ h:h===""?null:Number(h), a:a===""?null:Number(a),
+                status:(h!==""&&a!=="")?"final":"sched", det:"", src:"manual" };
+    save(); render(); return;
+  }
+  const cl=e.target.closest("[data-clear]");
+  if(cl){ delete store[Number(cl.dataset.clear)]; save(); render(); return; }
+});
+
+document.getElementById("refresh").addEventListener("click",()=>refresh(recentDates()));
+document.getElementById("syncall").addEventListener("click",()=>{
+  const today=todayLocalYMD();
+  refresh(ALL_DATES.filter(d=>d<=today));
+});
+
+let timer=null;
+document.getElementById("auto").addEventListener("change",(e)=>{
+  if(e.target.checked){ timer=setInterval(()=>refresh(recentDates()),60000); refresh(recentDates()); }
+  else if(timer){ clearInterval(timer); timer=null; }
+});
+
+render();
+</script>
+</body>
+</html>
