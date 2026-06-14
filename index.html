@@ -116,6 +116,11 @@ function todayLocalYMD(){
   const d=new Date();
   return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
 }
+function ymdShift(ymdStr, deltaDays){
+  const y=+ymdStr.slice(0,4), mo=+ymdStr.slice(4,6), da=+ymdStr.slice(6,8);
+  const d=new Date(y,mo-1,da); d.setDate(d.getDate()+deltaDays);
+  return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+}
 const ALL_DATES = [...new Set(MATCHES.map(m=>ymd(m.date)))].sort();
 
 // ---- ESPN fetch + merge ----
@@ -173,12 +178,15 @@ async function refresh(dates){
   btn.disabled=false; sync.disabled=false;
 }
 function recentDates(){
-  // today + previous 2 days that exist in the schedule
+  // today + previous 2 days, plus tomorrow.
+  // Late-night games (e.g. 10pm MT) cross midnight in ET/UTC, so ESPN files
+  // them on the NEXT calendar day -- always fetch tomorrow too so they update.
   const today=todayLocalYMD();
   const past = ALL_DATES.filter(d=>d<=today);
   const set=new Set(past.slice(-3));
   set.add(today);
-  return [...set].filter(d=>ALL_DATES.includes(d));
+  set.add(ymdShift(today,1));
+  return [...set];
 }
 
 // ---- rendering ----
@@ -287,7 +295,8 @@ document.addEventListener("click",(e)=>{
 document.getElementById("refresh").addEventListener("click",()=>refresh(recentDates()));
 document.getElementById("syncall").addEventListener("click",()=>{
   const today=todayLocalYMD();
-  refresh(ALL_DATES.filter(d=>d<=today));
+  // include tomorrow to catch late-night games ESPN files on the next day
+  refresh([...ALL_DATES.filter(d=>d<=today), ymdShift(today,1)]);
 });
 
 let timer=null;
