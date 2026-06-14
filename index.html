@@ -185,9 +185,31 @@
   .plist{padding:4px 0}
   .prow{display:flex;align-items:baseline;gap:8px;padding:8px 15px;border-top:1px solid rgba(255,255,255,.05)}
   .prow:first-child{border-top:none}
+  .pnum{font-variant-numeric:tabular-nums;font-weight:900;font-size:12px;color:#9aa6ba;width:26px;
+        height:22px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:7px;
+        background:rgba(255,255,255,.07);border:1px solid var(--line)}
   .pname{font-weight:800;font-size:15px;color:#e7edf6}
   .pname .cap{color:var(--gold);font-size:11px;font-weight:900;margin-left:5px;letter-spacing:.5px}
   .pclub{margin-left:auto;font-size:12px;color:#7c889e;font-weight:600;text-align:right;white-space:nowrap}
+
+  /* Predicted XI — formation pitch */
+  .pitch{position:relative;margin:2px 2px 6px;border-radius:16px;aspect-ratio:.72;max-width:440px;
+         background:repeating-linear-gradient(180deg,#0d5d30 0,#0d5d30 8.33%,#0a5029 8.33%,#0a5029 16.66%);
+         border:2px solid rgba(255,255,255,.22);overflow:hidden;
+         box-shadow:inset 0 0 46px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.45)}
+  .pitch .pline{position:absolute;left:8px;right:8px;top:50%;height:2px;background:rgba(255,255,255,.32)}
+  .pitch .pcirc{position:absolute;left:50%;top:50%;width:26%;aspect-ratio:1;transform:translate(-50%,-50%);
+                border:2px solid rgba(255,255,255,.28);border-radius:50%}
+  .pitch .pbox{position:absolute;left:24%;right:24%;height:12%;border:2px solid rgba(255,255,255,.24)}
+  .pitch .pbox.t{top:0;border-top:none;border-radius:0 0 8px 8px}
+  .pitch .pbox.b{bottom:0;border-bottom:none;border-radius:8px 8px 0 0}
+  .dot{position:absolute;transform:translate(-50%,-50%);width:62px;text-align:center;z-index:2}
+  .dot .num{width:33px;height:33px;margin:0 auto;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;font-weight:900;font-size:14px;color:#04130c;background:#fff;
+            border:2px solid rgba(0,0,0,.18);box-shadow:0 3px 9px rgba(0,0,0,.5)}
+  .dot.gk .num{background:var(--gold)}
+  .dot .nm{margin-top:3px;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.95);
+           white-space:nowrap;letter-spacing:.2px}
 </style>
 </head>
 <body>
@@ -415,36 +437,60 @@ const FILTERS=["Today","Live","All",ODDS_TAB,...FEATURED.map(f=>f.label),...STAG
 function involves(m, team){ const c=canon(team); return canon(m.home||"")===c || canon(m.away||"")===c; }
 function featsFor(m){ return FEATURED.filter(f=>involves(m,f.team)); }
 
-// ---- World Cup 2026 squads (compiled from official roster announcements; "c"=captain) ----
+// ---- World Cup 2026 squads (official 26-man rosters w/ shirt numbers; "c"=captain) ----
+// player = [number, name, club, isCaptain?]
 const SQUADS = {
   "United States": { coach:"Mauricio Pochettino",
-    GK:[["Matt Turner","New England Revolution"],["Matt Freese","New York City FC"],["Chris Brady","Chicago Fire"]],
-    DF:[["Sergiño Dest","PSV Eindhoven"],["Chris Richards","Crystal Palace"],["Tim Ream","Charlotte FC"],
-        ["Antonee Robinson","Fulham"],["Miles Robinson","FC Cincinnati"],["Joe Scally","Mönchengladbach"],
-        ["Auston Trusty","Celtic"],["Mark McKenzie","Toulouse"],["Alex Freeman","Villarreal"],["Max Arfsten","Columbus Crew"]],
-    MF:[["Tyler Adams","Bournemouth"],["Weston McKennie","Juventus"],["Cristian Roldan","Seattle Sounders"],
-        ["Sebastian Berhalter","Vancouver Whitecaps"],["Gio Reyna","Mönchengladbach"],["Malik Tillman","Bayer Leverkusen"]],
-    FW:[["Christian Pulisic","AC Milan",true],["Folarin Balogun","AS Monaco"],["Ricardo Pepi","PSV Eindhoven"],
-        ["Tim Weah","Marseille"],["Haji Wright","Coventry City"],["Brenden Aaronson","Leeds United"],["Alejandro Zendejas","Club América"]] },
+    GK:[[1,"Matt Turner","New England Revolution"],[24,"Matt Freese","New York City FC"],[25,"Chris Brady","Chicago Fire"]],
+    DF:[[2,"Sergiño Dest","PSV Eindhoven"],[3,"Chris Richards","Crystal Palace"],[5,"Antonee Robinson","Fulham"],
+        [6,"Auston Trusty","Celtic"],[12,"Miles Robinson","FC Cincinnati"],[13,"Tim Ream","Charlotte FC"],
+        [16,"Alex Freeman","Villarreal"],[18,"Max Arfsten","Columbus Crew"],[22,"Mark McKenzie","Toulouse"],[23,"Joe Scally","Mönchengladbach"]],
+    MF:[[4,"Tyler Adams","Bournemouth"],[7,"Gio Reyna","Mönchengladbach"],[8,"Weston McKennie","Juventus"],
+        [14,"Sebastian Berhalter","Vancouver Whitecaps"],[15,"Cristian Roldan","Seattle Sounders"],[17,"Malik Tillman","Bayer Leverkusen"]],
+    FW:[[9,"Ricardo Pepi","PSV Eindhoven"],[10,"Christian Pulisic","AC Milan",true],[11,"Brenden Aaronson","Leeds United"],
+        [19,"Haji Wright","Coventry City"],[20,"Folarin Balogun","AS Monaco"],[21,"Tim Weah","Marseille"],[26,"Alejandro Zendejas","Club América"]] },
   "Germany": { coach:"Julian Nagelsmann",
-    GK:[["Manuel Neuer","Bayern Munich"],["Oliver Baumann","Hoffenheim"],["Alexander Nübel","VfB Stuttgart"]],
-    DF:[["Antonio Rüdiger","Real Madrid"],["Jonathan Tah","Bayern Munich"],["Nico Schlotterbeck","Borussia Dortmund"],
-        ["Waldemar Anton","Borussia Dortmund"],["Malick Thiaw","Newcastle United"],["David Raum","RB Leipzig"],
-        ["Maximilian Mittelstädt","VfB Stuttgart"],["Nathaniel Brown","Eintracht Frankfurt"]],
-    MF:[["Joshua Kimmich","Bayern Munich",true],["Leon Goretzka","Bayern Munich"],["Aleksandar Pavlović","Bayern Munich"],
-        ["Angelo Stiller","VfB Stuttgart"],["Pascal Groß","Brighton"],["Felix Nmecha","Borussia Dortmund"],
-        ["Nadiem Amiri","Mainz 05"],["Assan Ouédraogo","RB Leipzig"]],
-    FW:[["Florian Wirtz","Liverpool"],["Jamal Musiala","Bayern Munich"],["Leroy Sané","Galatasaray"],
-        ["Kai Havertz","Arsenal"],["Nick Woltemade","Newcastle United"],["Deniz Undav","VfB Stuttgart"],["Maximilian Beier","Borussia Dortmund"]] },
+    GK:[[1,"Manuel Neuer","Bayern Munich"],[12,"Oliver Baumann","Hoffenheim"],[21,"Alexander Nübel","VfB Stuttgart"]],
+    DF:[[2,"Antonio Rüdiger","Real Madrid"],[3,"Waldemar Anton","Borussia Dortmund"],[4,"Jonathan Tah","Bayern Munich"],
+        [6,"Joshua Kimmich","Bayern Munich",true],[15,"Nico Schlotterbeck","Borussia Dortmund"],[18,"Nathaniel Brown","Eintracht Frankfurt"],
+        [22,"David Raum","RB Leipzig"],[24,"Malick Thiaw","Newcastle United"]],
+    MF:[[5,"Aleksandar Pavlović","Bayern Munich"],[8,"Leon Goretzka","Bayern Munich"],[13,"Pascal Groß","Brighton"],
+        [16,"Angelo Stiller","VfB Stuttgart"],[17,"Florian Wirtz","Liverpool"],[20,"Nadiem Amiri","Mainz 05"],
+        [23,"Felix Nmecha","Borussia Dortmund"],[25,"Assan Ouédraogo","RB Leipzig"]],
+    FW:[[7,"Kai Havertz","Arsenal"],[9,"Jamie Leweling","VfB Stuttgart"],[10,"Jamal Musiala","Bayern Munich"],
+        [11,"Nick Woltemade","Newcastle United"],[14,"Maximilian Beier","Borussia Dortmund"],[19,"Leroy Sané","Galatasaray"],[26,"Deniz Undav","VfB Stuttgart"]] },
 };
 const POS_META = { GK:{label:"Goalkeepers",dot:"🧤",cls:"gk"}, DF:{label:"Defenders",dot:"🛡️",cls:"df"},
                    MF:{label:"Midfielders",dot:"⚙️",cls:"mf"}, FW:{label:"Forwards",dot:"⚽",cls:"fw"} };
+
+// ---- Predicted starting XI (from the opening-match lineups). x/y = % across / down the pitch ----
+const LINEUPS = {
+  "United States": { formation:"5-3-2", xi:[
+    {n:24,name:"Freese",x:50,y:92,gk:1},
+    {n:5,name:"Robinson",x:12,y:71},{n:13,name:"Ream",x:33,y:75},{n:3,name:"Richards",x:50,y:76},{n:2,name:"Dest",x:67,y:75},{n:16,name:"Freeman",x:88,y:71},
+    {n:4,name:"Adams",x:30,y:50},{n:8,name:"McKennie",x:50,y:48},{n:10,name:"Pulisic",x:70,y:50},
+    {n:20,name:"Balogun",x:38,y:23},{n:21,name:"Weah",x:62,y:23}] },
+  "Germany": { formation:"4-2-3-1", xi:[
+    {n:1,name:"Neuer",x:50,y:92,gk:1},
+    {n:18,name:"Brown",x:13,y:72},{n:15,name:"Schlotterbeck",x:38,y:75},{n:4,name:"Tah",x:62,y:75},{n:6,name:"Kimmich",x:87,y:72},
+    {n:5,name:"Pavlović",x:35,y:55},{n:23,name:"Nmecha",x:65,y:55},
+    {n:17,name:"Wirtz",x:17,y:33},{n:10,name:"Musiala",x:50,y:34},{n:19,name:"Sané",x:83,y:33},
+    {n:7,name:"Havertz",x:50,y:15}] },
+};
+function renderXI(team){
+  const L = LINEUPS[team]; if(!L) return "";
+  const dots = L.xi.map(p=>
+    `<div class="dot ${p.gk?"gk":""}" style="left:${p.x}%;top:${p.y}%"><div class="num">${p.n}</div><div class="nm">${p.name}</div></div>`).join("");
+  return `<div class="squad"><div class="squadhdr"><span class="sflag">${flag(team)}</span>Predicted XI</div>
+    <p class="squadcoach">Likely starting lineup · formation <b>${L.formation}</b></p>
+    <div class="pitch"><div class="pline"></div><div class="pcirc"></div><div class="pbox t"></div><div class="pbox b"></div>${dots}</div></div>`;
+}
 function renderSquad(team){
   const sq = SQUADS[team]; if(!sq) return "";
   const blocks = ["GK","DF","MF","FW"].map(pos=>{
     const meta=POS_META[pos], players=sq[pos]||[];
-    const rows = players.map(([name,club,cap])=>
-      `<div class="prow"><span class="pname">${name}${cap?`<span class="cap">(C)</span>`:""}</span><span class="pclub">${club}</span></div>`).join("");
+    const rows = players.map(([num,name,club,cap])=>
+      `<div class="prow"><span class="pnum">${num}</span><span class="pname">${name}${cap?`<span class="cap">(C)</span>`:""}</span><span class="pclub">${club}</span></div>`).join("");
     return `<div class="posblock ${meta.cls}"><div class="poshd"><span class="dot">${meta.dot}</span>${meta.label}<span class="cnt">${players.length}</span></div><div class="plist">${rows}</div></div>`;
   }).join("");
   return `<div class="squad"><div class="squadhdr"><span class="sflag">${flag(team)}</span>Squad — ${team}</div>
@@ -512,7 +558,7 @@ function render(){
   else if(STAGES.includes(activeFilter)) list=list.filter(m=>m.stage===activeFilter);
 
   const host=document.getElementById("list");
-  const squadHTML = featTab ? renderSquad(featTab.team) : "";
+  const squadHTML = featTab ? (renderXI(featTab.team) + renderSquad(featTab.team)) : "";
   if(!list.length){
     host.innerHTML=`<div class="empty">${activeFilter==="Today"?"No matches scheduled for today.":
       activeFilter==="Live"?"No matches are live right now.":
