@@ -222,24 +222,29 @@
   .backbtn{font-size:20px;line-height:1;padding:4px 11px;border-radius:11px;font-weight:900;
            background:var(--card);border:1px solid var(--line);color:var(--txt);margin-right:2px}
 
-  /* ---- home menu ---- */
+  /* ---- home menu: World Cup stadium theme ---- */
   #home{position:fixed;inset:0;z-index:30;flex-direction:column;align-items:center;justify-content:center;
-        padding:28px;text-align:center;overflow:auto}
-  /* diagonal split: Germany (upper-right) vs USA (lower-left) */
-  .hbg{position:absolute;inset:0;z-index:-2}
-  .hbg.de{clip-path:polygon(0 0,100% 0,100% 100%);
-          background:linear-gradient(150deg,#050505 0%,#161616 32%,#7a0000 66%,#caa200 100%)}
-  .hbg.us{clip-path:polygon(0 0,0 100%,100% 100%);
-          background:linear-gradient(150deg,#0a1330 0%,#272655 42%,#7a1020 78%,#3c3b6e 100%)}
-  .hline{position:absolute;inset:0;z-index:-1;pointer-events:none;
-         background:linear-gradient(to top right,transparent calc(50% - 2px),
-                    rgba(255,255,255,.92) calc(50% - 2px),rgba(255,255,255,.92) calc(50% + 2px),
-                    transparent calc(50% + 2px))}
+        padding:28px;text-align:center;overflow:auto;
+        background:radial-gradient(78% 55% at 50% -8%, rgba(255,210,74,.22), transparent 62%),
+                   radial-gradient(72% 50% at 50% 112%, rgba(25,224,138,.20), transparent 62%),
+                   radial-gradient(60% 45% at 50% 50%, rgba(124,92,255,.12), transparent 72%),
+                   #05101a}
+  .hbg{position:absolute;inset:0;pointer-events:none}
+  .hbg.stripes{z-index:-2;background:repeating-linear-gradient(90deg,
+               rgba(25,224,138,.045) 0 32px, rgba(25,224,138,.085) 32px 64px)}
+  .hbg.pitchlines{z-index:-1}
+  .hbg.pitchlines::before{content:"";position:absolute;left:9%;right:9%;top:50%;height:2px;
+               background:rgba(255,255,255,.10);transform:translateY(-50%)}
+  .hbg.pitchlines::after{content:"";position:absolute;left:50%;top:50%;width:170px;height:170px;
+               transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.10);border-radius:50%}
   #home>.home-logo,#home>.home-title,#home>.home-tag,#home>.home-card,#home>.callout{position:relative;z-index:1}
-  .home-logo{font-size:64px;line-height:1;filter:drop-shadow(0 6px 16px rgba(0,0,0,.6));margin-bottom:6px}
-  .home-title{font-size:34px;margin:0;font-weight:900;letter-spacing:.4px;
-              background:linear-gradient(90deg,#19e08a,#7c5cff 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .home-tag{font-size:13px;color:var(--muted);font-weight:700;margin:6px 0 30px;letter-spacing:.4px}
+  .home-logo{font-size:70px;line-height:1;filter:drop-shadow(0 8px 22px rgba(255,210,74,.6));margin-bottom:4px;
+             animation:trophyFloat 3.4s ease-in-out infinite}
+  @keyframes trophyFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7px) rotate(3deg)}}
+  .home-title{font-size:36px;margin:0;font-weight:900;letter-spacing:.4px;
+              background:linear-gradient(90deg,#ffd24a,#19e08a 60%,#7c5cff);-webkit-background-clip:text;background-clip:text;color:transparent;
+              text-shadow:0 4px 30px rgba(255,210,74,.15)}
+  .home-tag{font-size:12px;color:#d6ddea;font-weight:800;margin:7px 0 28px;letter-spacing:2px}
   .home-card{display:flex;align-items:center;gap:16px;width:100%;max-width:430px;text-align:left;
              padding:20px 22px;margin-bottom:15px;border-radius:20px;
              background:rgba(8,10,16,.6);backdrop-filter:blur(10px) saturate(130%);
@@ -294,6 +299,19 @@
   .tp-worth{background:linear-gradient(135deg,#19e08a,#0bbf93);color:#04130c}
   .tp-skip{background:rgba(255,255,255,.12);color:#cdd6e6}
 
+  /* home "My teams" card + picker modal (bottom sheet) */
+  .home-card.teams{background:rgba(124,92,255,.16);border-color:rgba(124,92,255,.45)}
+  #teammodal{position:fixed;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center;
+             background:rgba(0,0,0,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  body.tm-open #teammodal{display:flex}
+  .tm-inner{width:100%;max-width:560px;max-height:86vh;overflow:auto;background:#0b1018;
+            border:1px solid var(--line);border-radius:22px 22px 0 0;
+            padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
+  .tm-head{display:flex;align-items:center;margin-bottom:14px}
+  .tm-head b{font-size:18px;font-weight:900}
+  .tm-done{margin-left:auto;background:linear-gradient(135deg,#19e08a,#0bbf93);color:#04130c;border:none;
+           border-radius:11px;padding:9px 18px;font-weight:900}
+
   /* recommendation mode toggle + predictor breakdown */
   .recmodes{display:flex;gap:8px;margin:2px 2px 14px}
   .recmodes .rm{flex:1;border-radius:12px;padding:10px;font-weight:800;font-size:13px;color:#aeb8c9;
@@ -334,12 +352,11 @@
 </head>
 <body data-view="home">
 <div id="home">
-  <div class="hbg de"></div>
-  <div class="hbg us"></div>
-  <div class="hline"></div>
+  <div class="hbg stripes"></div>
+  <div class="hbg pitchlines"></div>
   <span class="home-logo">🏆</span>
   <h1 class="home-title">World Cup 2026</h1>
-  <p class="home-tag">YOUR SPOILER-FREE COMPANION</p>
+  <p class="home-tag">USA · CANADA · MEXICO</p>
   <button class="home-card" data-go="scores">
     <span class="hc-emoji">📺</span>
     <span class="hc-txt"><b>View scores</b><small>Live &amp; final results, schedule, squads &amp; title odds</small></span>
@@ -352,6 +369,16 @@
     <span class="hc-emoji">🎬</span>
     <span class="hc-txt"><b>Game recommendations</b><small>What's worth watching — no scores spoiled</small></span>
   </button>
+  <button class="home-card teams" data-teammodal>
+    <span class="hc-emoji">⭐</span>
+    <span class="hc-txt"><b>My teams</b><small id="homeTeamSum">Pick your team &amp; favorites</small></span>
+  </button>
+</div>
+<div id="teammodal">
+  <div class="tm-inner">
+    <div class="tm-head"><b>⭐ My teams</b><button class="tm-done" data-teamclose>Done</button></div>
+    <div id="tmbody"></div>
+  </div>
 </div>
 <header>
   <div class="brand">
@@ -378,7 +405,7 @@
 <script>
 const MATCHES = [{"id": 1, "stage": "Group Stage", "date": "2026-06-11", "time": "1:00 PM", "home": "Mexico", "away": "South Africa", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 2, "stage": "Group Stage", "date": "2026-06-11", "time": "8:00 PM", "home": "South Korea", "away": "Czechia", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 3, "stage": "Group Stage", "date": "2026-06-12", "time": "1:00 PM", "home": "Canada", "away": "Bosnia and Herzegovina", "venue": "BMO Field; Toronto, CAN"}, {"id": 4, "stage": "Group Stage", "date": "2026-06-12", "time": "7:00 PM", "home": "United States", "away": "Paraguay", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 5, "stage": "Group Stage", "date": "2026-06-13", "time": "1:00 PM", "home": "Qatar", "away": "Switzerland", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 6, "stage": "Group Stage", "date": "2026-06-13", "time": "4:00 PM", "home": "Brazil", "away": "Morocco", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 7, "stage": "Group Stage", "date": "2026-06-13", "time": "7:00 PM", "home": "Haiti", "away": "Scotland", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 8, "stage": "Group Stage", "date": "2026-06-13", "time": "10:00 PM", "home": "Australia", "away": "Türkiye", "venue": "BC Place; Vancouver, CAN"}, {"id": 9, "stage": "Group Stage", "date": "2026-06-14", "time": "11:00 AM", "home": "Germany", "away": "Curacao", "venue": "NRG Stadium; Houston, TX"}, {"id": 10, "stage": "Group Stage", "date": "2026-06-14", "time": "2:00 PM", "home": "Netherlands", "away": "Japan", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 11, "stage": "Group Stage", "date": "2026-06-14", "time": "5:00 PM", "home": "Ivory Coast", "away": "Ecuador", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 12, "stage": "Group Stage", "date": "2026-06-14", "time": "8:00 PM", "home": "Sweden", "away": "Tunisia", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 13, "stage": "Group Stage", "date": "2026-06-15", "time": "10:00 AM", "home": "Spain", "away": "Cape Verde", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 14, "stage": "Group Stage", "date": "2026-06-15", "time": "1:00 PM", "home": "Belgium", "away": "Egypt", "venue": "Lumen Field; Seattle, WA"}, {"id": 15, "stage": "Group Stage", "date": "2026-06-15", "time": "4:00 PM", "home": "Saudi Arabia", "away": "Uruguay", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 16, "stage": "Group Stage", "date": "2026-06-15", "time": "7:00 PM", "home": "Iran", "away": "New Zealand", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 17, "stage": "Group Stage", "date": "2026-06-16", "time": "1:00 PM", "home": "France", "away": "Senegal", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 18, "stage": "Group Stage", "date": "2026-06-16", "time": "4:00 PM", "home": "Iraq", "away": "Norway", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 19, "stage": "Group Stage", "date": "2026-06-16", "time": "7:00 PM", "home": "Argentina", "away": "Algeria", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 20, "stage": "Group Stage", "date": "2026-06-16", "time": "10:00 PM", "home": "Austria", "away": "Jordan", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 21, "stage": "Group Stage", "date": "2026-06-17", "time": "11:00 AM", "home": "Portugal", "away": "Congo DR", "venue": "NRG Stadium; Houston, TX"}, {"id": 22, "stage": "Group Stage", "date": "2026-06-17", "time": "2:00 PM", "home": "England", "away": "Croatia", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 23, "stage": "Group Stage", "date": "2026-06-17", "time": "5:00 PM", "home": "Ghana", "away": "Panama", "venue": "BMO Field; Toronto, CAN"}, {"id": 24, "stage": "Group Stage", "date": "2026-06-17", "time": "8:00 PM", "home": "Uzbekistan", "away": "Colombia", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 25, "stage": "Group Stage", "date": "2026-06-18", "time": "10:00 AM", "home": "Czechia", "away": "South Africa", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 26, "stage": "Group Stage", "date": "2026-06-18", "time": "1:00 PM", "home": "Switzerland", "away": "Bosnia and Herzegovina", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 27, "stage": "Group Stage", "date": "2026-06-18", "time": "4:00 PM", "home": "Canada", "away": "Qatar", "venue": "BC Place; Vancouver, CAN"}, {"id": 28, "stage": "Group Stage", "date": "2026-06-18", "time": "7:00 PM", "home": "Mexico", "away": "South Korea", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 29, "stage": "Group Stage", "date": "2026-06-19", "time": "1:00 PM", "home": "United States", "away": "Australia", "venue": "Lumen Field; Seattle, WA"}, {"id": 30, "stage": "Group Stage", "date": "2026-06-19", "time": "4:00 PM", "home": "Scotland", "away": "Morocco", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 31, "stage": "Group Stage", "date": "2026-06-19", "time": "7:30 PM", "home": "Brazil", "away": "Haiti", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 32, "stage": "Group Stage", "date": "2026-06-19", "time": "9:00 PM", "home": "Türkiye", "away": "Paraguay", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 33, "stage": "Group Stage", "date": "2026-06-20", "time": "11:00 AM", "home": "Netherlands", "away": "Sweden", "venue": "NRG Stadium; Houston, TX"}, {"id": 34, "stage": "Group Stage", "date": "2026-06-20", "time": "2:00 PM", "home": "Germany", "away": "Ivory Coast", "venue": "BMO Field; Toronto, CAN"}, {"id": 35, "stage": "Group Stage", "date": "2026-06-20", "time": "6:00 PM", "home": "Ecuador", "away": "Curacao", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 36, "stage": "Group Stage", "date": "2026-06-20", "time": "10:00 PM", "home": "Tunisia", "away": "Japan", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 37, "stage": "Group Stage", "date": "2026-06-21", "time": "10:00 AM", "home": "Spain", "away": "Saudi Arabia", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 38, "stage": "Group Stage", "date": "2026-06-21", "time": "1:00 PM", "home": "Belgium", "away": "Iran", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 39, "stage": "Group Stage", "date": "2026-06-21", "time": "4:00 PM", "home": "Uruguay", "away": "Cape Verde", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 40, "stage": "Group Stage", "date": "2026-06-21", "time": "7:00 PM", "home": "New Zealand", "away": "Egypt", "venue": "BC Place; Vancouver, CAN"}, {"id": 41, "stage": "Group Stage", "date": "2026-06-22", "time": "11:00 AM", "home": "Argentina", "away": "Austria", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 42, "stage": "Group Stage", "date": "2026-06-22", "time": "3:00 PM", "home": "France", "away": "Iraq", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 43, "stage": "Group Stage", "date": "2026-06-22", "time": "6:00 PM", "home": "Norway", "away": "Senegal", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 44, "stage": "Group Stage", "date": "2026-06-22", "time": "9:00 PM", "home": "Jordan", "away": "Algeria", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 45, "stage": "Group Stage", "date": "2026-06-23", "time": "11:00 AM", "home": "Portugal", "away": "Uzbekistan", "venue": "NRG Stadium; Houston, TX"}, {"id": 46, "stage": "Group Stage", "date": "2026-06-23", "time": "2:00 PM", "home": "England", "away": "Ghana", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 47, "stage": "Group Stage", "date": "2026-06-23", "time": "5:00 PM", "home": "Panama", "away": "Croatia", "venue": "BMO Field; Toronto, CAN"}, {"id": 48, "stage": "Group Stage", "date": "2026-06-23", "time": "8:00 PM", "home": "Colombia", "away": "Congo DR", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 49, "stage": "Group Stage", "date": "2026-06-24", "time": "1:00 PM", "home": "Switzerland", "away": "Canada", "venue": "BC Place; Vancouver, CAN"}, {"id": 50, "stage": "Group Stage", "date": "2026-06-24", "time": "1:00 PM", "home": "Bosnia and Herzegovina", "away": "Qatar", "venue": "Lumen Field; Seattle, WA"}, {"id": 51, "stage": "Group Stage", "date": "2026-06-24", "time": "4:00 PM", "home": "Scotland", "away": "Brazil", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 52, "stage": "Group Stage", "date": "2026-06-24", "time": "4:00 PM", "home": "Morocco", "away": "Haiti", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 53, "stage": "Group Stage", "date": "2026-06-24", "time": "7:00 PM", "home": "Czechia", "away": "Mexico", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 54, "stage": "Group Stage", "date": "2026-06-24", "time": "7:00 PM", "home": "South Africa", "away": "South Korea", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 55, "stage": "Group Stage", "date": "2026-06-25", "time": "2:00 PM", "home": "Curacao", "away": "Ivory Coast", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 56, "stage": "Group Stage", "date": "2026-06-25", "time": "2:00 PM", "home": "Ecuador", "away": "Germany", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 57, "stage": "Group Stage", "date": "2026-06-25", "time": "5:00 PM", "home": "Tunisia", "away": "Netherlands", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 58, "stage": "Group Stage", "date": "2026-06-25", "time": "5:00 PM", "home": "Japan", "away": "Sweden", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 59, "stage": "Group Stage", "date": "2026-06-25", "time": "8:00 PM", "home": "Türkiye", "away": "United States", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 60, "stage": "Group Stage", "date": "2026-06-25", "time": "8:00 PM", "home": "Paraguay", "away": "Australia", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 61, "stage": "Group Stage", "date": "2026-06-26", "time": "1:00 PM", "home": "Norway", "away": "France", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 62, "stage": "Group Stage", "date": "2026-06-26", "time": "1:00 PM", "home": "Senegal", "away": "Iraq", "venue": "BMO Field; Toronto, CAN"}, {"id": 63, "stage": "Group Stage", "date": "2026-06-26", "time": "6:00 PM", "home": "Uruguay", "away": "Spain", "venue": "Estadio Akron; Guadalajara, MEX"}, {"id": 64, "stage": "Group Stage", "date": "2026-06-26", "time": "6:00 PM", "home": "Cape Verde", "away": "Saudi Arabia", "venue": "NRG Stadium; Houston, TX"}, {"id": 65, "stage": "Group Stage", "date": "2026-06-26", "time": "9:00 PM", "home": "New Zealand", "away": "Belgium", "venue": "BC Place; Vancouver, CAN"}, {"id": 66, "stage": "Group Stage", "date": "2026-06-26", "time": "9:00 PM", "home": "Egypt", "away": "Iran", "venue": "Lumen Field; Seattle, WA"}, {"id": 67, "stage": "Group Stage", "date": "2026-06-27", "time": "3:00 PM", "home": "Panama", "away": "England", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 68, "stage": "Group Stage", "date": "2026-06-27", "time": "3:00 PM", "home": "Croatia", "away": "Ghana", "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 69, "stage": "Group Stage", "date": "2026-06-27", "time": "5:30 PM", "home": "Colombia", "away": "Portugal", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 70, "stage": "Group Stage", "date": "2026-06-27", "time": "5:30 PM", "home": "Congo DR", "away": "Uzbekistan", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 71, "stage": "Group Stage", "date": "2026-06-27", "time": "9:00 PM", "home": "Jordan", "away": "Argentina", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 72, "stage": "Group Stage", "date": "2026-06-27", "time": "9:00 PM", "home": "Algeria", "away": "Austria", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 73, "stage": "Round of 32", "date": "2026-06-28", "time": "1:00 PM", "home": "2A", "away": "2B", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 74, "stage": "Round of 32", "date": "2026-06-29", "time": "11:00 AM", "home": "1C", "away": "2F", "venue": "NRG Stadium; Houston, TX"}, {"id": 75, "stage": "Round of 32", "date": "2026-06-29", "time": "2:30 PM", "home": "1E", "away": "3ABCDF", "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 76, "stage": "Round of 32", "date": "2026-06-29", "time": "7:00 PM", "home": "1F", "away": "2C", "venue": "Estadio BBVA Bancomer; Monterrey, MEX"}, {"id": 77, "stage": "Round of 32", "date": "2026-06-30", "time": "11:00 AM", "home": "2E", "away": "2I", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 78, "stage": "Round of 32", "date": "2026-06-30", "time": "3:00 PM", "home": "1I", "away": "3CDFGH", "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 79, "stage": "Round of 32", "date": "2026-06-30", "time": "7:00 PM", "home": "1A", "away": "3CEFHI", "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 80, "stage": "Round of 32", "date": "2026-07-01", "time": "10:00 AM", "home": "1L", "away": "3EHIJK", "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 81, "stage": "Round of 32", "date": "2026-07-01", "time": "2:00 PM", "home": "1G", "away": "3AEHIJ", "venue": "Lumen Field; Seattle, WA"}, {"id": 82, "stage": "Round of 32", "date": "2026-07-01", "time": "6:00 PM", "home": "1D", "away": "3BEFIJ", "venue": "Levi's Stadium; Santa Clara, CA"}, {"id": 83, "stage": "Round of 32", "date": "2026-07-02", "time": "1:00 PM", "home": "1H", "away": "2J", "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 84, "stage": "Round of 32", "date": "2026-07-02", "time": "5:00 PM", "home": "2K", "away": "2L", "venue": "BMO Field; Toronto, CAN"}, {"id": 85, "stage": "Round of 32", "date": "2026-07-02", "time": "9:00 PM", "home": "1B", "away": "3EFGIJ", "venue": "BC Place; Vancouver, CAN"}, {"id": 86, "stage": "Round of 32", "date": "2026-07-03", "time": "12:00 PM", "home": "2D", "away": "2G", "venue": "AT&T Stadium; Arlington, TX"}, {"id": 87, "stage": "Round of 32", "date": "2026-07-03", "time": "4:00 PM", "home": "1J", "away": "2H", "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 88, "stage": "Round of 32", "date": "2026-07-03", "time": "7:30 PM", "home": "1K", "away": "3DEIJL", "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 89, "stage": "Round of 16", "date": "2026-07-04", "time": "11:00 AM", "home": null, "away": null, "venue": "NRG Stadium; Houston, TX"}, {"id": 90, "stage": "Round of 16", "date": "2026-07-04", "time": "3:00 PM", "home": null, "away": null, "venue": "Lincoln Financial Field; Philadelphia, PA"}, {"id": 91, "stage": "Round of 16", "date": "2026-07-05", "time": "2:00 PM", "home": null, "away": null, "venue": "MetLife Stadium; East Rutherford, NJ"}, {"id": 92, "stage": "Round of 16", "date": "2026-07-05", "time": "6:00 PM", "home": null, "away": null, "venue": "Estadio Azteca; Mexico City, MEX"}, {"id": 93, "stage": "Round of 16", "date": "2026-07-06", "time": "1:00 PM", "home": null, "away": null, "venue": "AT&T Stadium; Arlington, TX"}, {"id": 94, "stage": "Round of 16", "date": "2026-07-06", "time": "6:00 PM", "home": null, "away": null, "venue": "Lumen Field; Seattle, WA"}, {"id": 95, "stage": "Round of 16", "date": "2026-07-07", "time": "10:00 AM", "home": null, "away": null, "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 96, "stage": "Round of 16", "date": "2026-07-07", "time": "2:00 PM", "home": null, "away": null, "venue": "BC Place; Vancouver, CAN"}, {"id": 97, "stage": "Quarterfinals", "date": "2026-07-09", "time": "2:00 PM", "home": null, "away": null, "venue": "Gillette Stadium; Foxborough, MA"}, {"id": 98, "stage": "Quarterfinals", "date": "2026-07-10", "time": "1:00 PM", "home": null, "away": null, "venue": "SoFi Stadium; Inglewood, CA"}, {"id": 99, "stage": "Quarterfinals", "date": "2026-07-11", "time": "3:00 PM", "home": null, "away": null, "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 100, "stage": "Quarterfinals", "date": "2026-07-11", "time": "7:00 PM", "home": null, "away": null, "venue": "Arrowhead Stadium; Kansas City, MO"}, {"id": 101, "stage": "Semifinals", "date": "2026-07-14", "time": "1:00 PM", "home": null, "away": null, "venue": "AT&T Stadium; Arlington, TX"}, {"id": 102, "stage": "Semifinals", "date": "2026-07-15", "time": "1:00 PM", "home": null, "away": null, "venue": "Mercedes-Benz Stadium; Atlanta, GA"}, {"id": 103, "stage": "Third-Place Match", "date": "2026-07-18", "time": "3:00 PM", "home": null, "away": null, "venue": "Hard Rock Stadium; Miami, FL"}, {"id": 104, "stage": "Final", "date": "2026-07-19", "time": "1:00 PM", "home": null, "away": null, "venue": "MetLife Stadium; East Rutherford, NJ"}];
 const FLAGS = {"mexico": "🇲🇽", "southafrica": "🇿🇦", "southkorea": "🇰🇷", "czechia": "🇨🇿", "canada": "🇨🇦", "bosniaandherzegovina": "🇧🇦", "unitedstates": "🇺🇸", "paraguay": "🇵🇾", "qatar": "🇶🇦", "switzerland": "🇨🇭", "brazil": "🇧🇷", "morocco": "🇲🇦", "haiti": "🇭🇹", "scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "australia": "🇦🇺", "turkiye": "🇹🇷", "germany": "🇩🇪", "curacao": "🇨🇼", "netherlands": "🇳🇱", "japan": "🇯🇵", "ivorycoast": "🇨🇮", "ecuador": "🇪🇨", "sweden": "🇸🇪", "tunisia": "🇹🇳", "spain": "🇪🇸", "capeverde": "🇨🇻", "belgium": "🇧🇪", "egypt": "🇪🇬", "saudiarabia": "🇸🇦", "uruguay": "🇺🇾", "iran": "🇮🇷", "newzealand": "🇳🇿", "france": "🇫🇷", "senegal": "🇸🇳", "iraq": "🇮🇶", "norway": "🇳🇴", "argentina": "🇦🇷", "algeria": "🇩🇿", "austria": "🇦🇹", "jordan": "🇯🇴", "portugal": "🇵🇹", "congodr": "🇨🇩", "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "croatia": "🇭🇷", "ghana": "🇬🇭", "panama": "🇵🇦", "uzbekistan": "🇺🇿", "colombia": "🇨🇴"};
-const APP_VERSION = "v13 (2026-06-21)";
+const APP_VERSION = "v14 (2026-06-21)";
 const LEAGUE = "fifa.world"; // ESPN public soccer league slug for the FIFA World Cup
 const LS_SCORES = "wc26.scores.v1";
 const LS_FILTER = "wc26.filter.v1";
@@ -723,10 +750,12 @@ document.addEventListener("click",(e)=>{
   const go=e.target.closest("[data-go]"); if(go){ setView(go.dataset.go); return; }
   if(e.target.closest("#backhome")){ setView("home"); return; }
   const rm=e.target.closest("[data-rm]"); if(rm){ recMode=rm.dataset.rm; renderRecs(); return; }
-  if(e.target.closest("[data-myteams]")){ showTeams=!showTeams; renderRecs(); return; }
+  if(e.target.closest("[data-teammodal]")){ openTeamModal(true); return; }
+  if(e.target.closest("[data-teamclose]")){ openTeamModal(false); return; }
+  if(e.target.id==="teammodal"){ openTeamModal(false); return; }   // tap backdrop to close
   const lk=e.target.closest("[data-like]");
   if(lk){ const t=lk.dataset.like; const i=LIKE_TEAMS.indexOf(t);
-    if(i<0) LIKE_TEAMS.push(t); else LIKE_TEAMS.splice(i,1); saveTeams(); renderRecs(); return; }
+    if(i<0) LIKE_TEAMS.push(t); else LIKE_TEAMS.splice(i,1); teamsChanged(); return; }
   const rv=e.target.closest("[data-reveal]"); if(rv){ revealed.add(Number(rv.dataset.reveal)); renderRecs(); return; }
   if(e.target.closest("[data-recrefresh]")){ loadHistory(true); loadOdds(true); return; }
   if(e.target.closest("#oddrefresh")){ loadOdds(true); return; }
@@ -827,6 +856,14 @@ function teamsPanelHTML(){
     <div class="mtlabel">⭐ Teams you like <span class="mtsub">tap to toggle — boosted to at least “worth watching”</span></div>
     <div class="mtchips">${chips}</div></div>`;
 }
+function renderTeamUI(){
+  const el=document.getElementById("homeTeamSum");
+  if(el) el.textContent = MY_TEAM ? `${flag(MY_TEAM)} ${MY_TEAM}${LIKE_TEAMS.length?`  ·  ⭐ ${LIKE_TEAMS.length} liked`:""}` : "Pick your team & favorites";
+  const body=document.getElementById("tmbody");
+  if(body && document.body.classList.contains("tm-open")) body.innerHTML=teamsPanelHTML();
+}
+function openTeamModal(open){ document.body.classList.toggle("tm-open",open); if(open) renderTeamUI(); }
+function teamsChanged(){ saveTeams(); renderTeamUI(); if(view==="recs") renderRecs(); }
 async function loadHistory(force){
   if(histLoading) return;
   if(histLoaded && !force) return;
@@ -1014,9 +1051,8 @@ function renderRecs(){
   const toggle=`<div class="recmodes">
     <button class="rm ${recMode==="upcoming"?"on":""}" data-rm="upcoming">🔮 Coming up</button>
     <button class="rm ${recMode==="played"?"on":""}" data-rm="played">🎬 Already played</button></div>`;
-  const sum = MY_TEAM ? `💙 Your team: ${flag(MY_TEAM)} ${MY_TEAM}` : "Pick your team to flag its games as must-watch";
-  const status = `<div class="mtstatus">${sum}${LIKE_TEAMS.length?` · ⭐ ${LIKE_TEAMS.length} liked`:""} <span class="lk" data-myteams>${showTeams?"close":"edit"}</span></div>`;
-  host.innerHTML = toggle + status + (showTeams?teamsPanelHTML():"") + (recMode==="upcoming" ? predictHTML() : playedHTML());
+  const sum = MY_TEAM ? `<div class="mtstatus">💙 Your team: ${flag(MY_TEAM)} ${MY_TEAM}${LIKE_TEAMS.length?` · ⭐ ${LIKE_TEAMS.length} liked`:""} <span class="lk" data-go="home">change on home ›</span></div>` : "";
+  host.innerHTML = toggle + sum + (recMode==="upcoming" ? predictHTML() : playedHTML());
 }
 
 // ---- view management ----
@@ -1024,7 +1060,8 @@ let view = "home";
 function setSub(t){ const s=document.getElementById("sub"); if(s) s.textContent=t; }
 function setView(v){
   view=v; document.body.dataset.view=v; window.scrollTo(0,0);
-  if(v==="scores"){ setSub("All times Mountain Time · live scores"); render(); }
+  if(v==="home"){ renderTeamUI(); }
+  else if(v==="scores"){ setSub("All times Mountain Time · live scores"); render(); }
   else if(v==="recs"){ setSub("What's worth watching"); renderRecs(); loadHistory(false); loadOdds(false); }
 }
 
@@ -1040,7 +1077,7 @@ document.getElementById("auto").addEventListener("change",(e)=>{
   else if(timer){ clearInterval(timer); timer=null; }
 });
 document.addEventListener("change",(e)=>{
-  if(e.target.id==="myteamsel"){ MY_TEAM=e.target.value; saveTeams(); renderRecs(); }
+  if(e.target.id==="myteamsel"){ MY_TEAM=e.target.value; teamsChanged(); }
 });
 let taps=0, tapt=0;
 document.getElementById("logo").addEventListener("click",()=>{
